@@ -47,6 +47,7 @@ func createBlocker(x, y int) Node {
 	}
 }
 
+// TODO: Forgot about southern and eastern walls?
 func generateTerrain() [10][10]Node {
 	var terrain [10][10]Node
 	// Generate the walls
@@ -82,8 +83,23 @@ func reconstructPath(cameFrom map[*Node]*Node, current *Node) []Node {
 	return totalPath
 }
 
+// TODO: Add simplified version.
 func printResult(totalPath []Node, terrain [10][10]Node) {
-	
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+			found := false
+			for _, node := range totalPath {
+				if i == node.coordinate.X && j == node.coordinate.Y {
+					fmt.Printf("(#, %d) ", node.distance)
+					found = true
+				}
+			}
+			if !found {
+				fmt.Printf("(., %d)", terrain[i][j].distance)
+			}
+		}
+		fmt.Println()
+	}
 }
 
 func getNeighbors(terrain [10][10]Node, nodeCoords Coordinate) []Neighbor {
@@ -115,7 +131,7 @@ func getNeighbors(terrain [10][10]Node, nodeCoords Coordinate) []Neighbor {
 	return neighbors
 }
 
-func aStar(start Node, goal Node, heuristic octFunc, terrain [10][10]Node) any {
+func aStar(start Node, goal Node, heuristic octFunc, terrain [10][10]Node) []Node {
 	openSet := make(PriorityQueue, 0)
 	heap.Init(&openSet)
 	cameFrom := make(map[*Node]*Node)
@@ -151,12 +167,15 @@ func aStar(start Node, goal Node, heuristic octFunc, terrain [10][10]Node) any {
 			}
 		}
 	}
-	return false
+	return make([]Node, 0)
 }
 
 func main() {
 	terrain := generateTerrain()
 	aStarRes := aStar(terrain[1][1], terrain[8][8], octileDistance, terrain)
-	fmt.Print("result: ")
-	fmt.Println(aStarRes)
+	if len(aStarRes) > 0 {
+		printResult(aStarRes, terrain)
+	} else {
+		fmt.Print("No path found!")
+	}
 }
